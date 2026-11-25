@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Галерея & Рейтинг{% endblock %}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: "Georgia", serif;
+            background-color: #faf9f6;
+            color: #1c1917;
+        }
+        header {
+            padding: 20px 40px;
+            background: #ffffff;
+            border-bottom: 1px solid #e7e5e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            text-decoration: none;
+            color: #1c1917;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .nav-links a {
+            font-size: 15px;
+            font-weight: normal;
+            margin-left: 20px;
+            font-family: sans-serif;
+            color: #44403c;
+        }
+        .nav-links a:hover {
+            color: #1c1917;
+        }
+        .error-box, .auth-box {
+            max-width: 440px;
+            margin: 80px auto;
+            padding: 40px;
+            background: #ffffff;
+            border: 1px solid #e7e5e4;
+        }
+        .error-box {
+            text-align: center;
+        }
+        .error-code {
+            font-size: 64px;
+            color: #9a3412;
+            margin: 0;
+        }
+        .auth-box h2 {
+            margin-top: 0;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 18px;
+            font-family: sans-serif;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #44403c;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d6d3d1;
+            font-size: 15px;
+            background-color: #faf9f6;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #1c1917;
+            background-color: #ffffff;
+        }
+        .alert-error {
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-family: sans-serif;
+            font-size: 14px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 24px;
+            background: #1c1917;
+            color: #ffffff;
+            text-decoration: none;
+            font-family: sans-serif;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-full {
+            width: 100%;
+        }
+        .btn:hover {
+            background: #44403c;
+        }
+        .auth-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #57534e;
+        }
+        .auth-footer a {
+            color: #1c1917;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/">Галерея & Рейтинг</a>
+        <div class="nav-links">
+            <a href="/login">Войти</a>
+            <a href="/register">Регистрация</a>
+        </div>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

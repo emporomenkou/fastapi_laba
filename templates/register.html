@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация (если получится) — Галерея & Рейтинг{% endblock %}
+
+{% block content %}
+<style>
+    .form-group input[type="text"].input-bad {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+    }
+    .form-group input[type="text"].input-ok {
+        border-color: #16a34a !important;
+        background-color: #f0fdf4 !important;
+    }
+    .form-group input[type="range"] {
+        width: 100%;
+        margin: 8px 0;
+        cursor: grab;
+        accent-color: #9a3412;
+    }
+    .form-group input[type="range"]:active {
+        cursor: grabbing;
+    }
+    .hell-note {
+        font-size: 12px;
+        color: #9a3412;
+        font-family: sans-serif;
+        margin-top: 4px;
+        font-style: italic;
+    }
+    .hell-note.ok-note {
+        color: #15803d;
+    }
+    .age-display {
+        font-family: monospace;
+        font-size: 18px;
+        font-weight: bold;
+        color: #9a3412;
+        background: #fef2f2;
+        padding: 2px 6px;
+        border: 1px solid #fecaca;
+    }
+    .color-compare {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .color-box-wrap {
+        flex: 1;
+        font-size: 11px;
+        color: #57534e;
+        text-align: center;
+    }
+    .color-sample {
+        width: 100%;
+        height: 42px;
+        background-color: #7b3f00;
+        border: 1px solid #1c1917;
+        margin-bottom: 4px;
+    }
+    .user-color-sample {
+        width: 100%;
+        height: 42px;
+        background-color: #ffffff;
+        border: 1px dashed #a8a29e;
+        margin-bottom: 4px;
+        transition: background-color 0.2s;
+    }
+    .runaway-wrapper {
+        position: relative;
+        height: 60px;
+        margin-top: 20px;
+    }
+    #submit-btn {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transition: all 0.15s ease;
+    }
+    .terms-box {
+        height: 75px;
+        overflow-y: scroll;
+        border: 1px solid #d6d3d1;
+        padding: 10px;
+        font-size: 11px;
+        font-family: sans-serif;
+        background: #faf9f6;
+        color: #57534e;
+        margin-bottom: 10px;
+    }
+    .reset-link {
+        font-size: 11px;
+        color: #9a3412;
+        cursor: pointer;
+        text-decoration: underline;
+        font-family: sans-serif;
+    }
+</style>
+
+<div class="auth-box" style="max-width: 500px;">
+    <h2>Создание аккаунта</h2>
+    <p style="text-align: center; font-size: 13px; color: #57534e; margin-top: -15px; margin-bottom: 25px;">
+        Пожалуйста, заполните форму. Мы в вас не верим.
+    </p>
+
+    {% if error %}
+        <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/register" id="hell-form">
+        <!-- 1. Логин на латинице без гласных -->
+        <div class="form-group">
+            <label for="username">Придумайте логин (только латиница, от 3 до 12 букв, БЕЗ гласных)</label>
+            <input type="text" id="username" name="username" required placeholder="Например: Ktrxlsh">
+            <div class="hell-note" id="login-roast">Обычные имена вроде «Ivan» или «art_lover» заняты ещё в 1998 году.</div>
+        </div>
+
+        <!-- 2. Ползунок возраста -->
+        <div class="form-group">
+            <label for="age-slider">Укажите ваш точный возраст: <span class="age-display" id="age-val">0.00</span> лет</label>
+            <input
+                type="range"
+                id="age-slider"
+                name="age"
+                min="0"
+                max="120"
+                step="0.01"
+                value="0"
+                oninput="document.getElementById('age-val').innerText = parseFloat(this.value).toFixed(2)"
+            >
+            <div class="hell-note" id="age-roast">Стрелочки на клавиатуре отключены. Двигайте мышкой, пока не состарились.</div>
+        </div>
+
+        <!-- 3. Пароль-квест строго на латинице -->
+        <div class="form-group">
+            <label for="password">Пароль (строго латиница)</label>
+            <input type="text" id="password" name="password" required placeholder="Показываем текст, чтобы все видели ваш позор">
+            <div class="hell-note" id="pass-roast">Нужны: заглавная буква, арабская цифра (0-9), римская цифра (I, V, X, L, C, D, M), спецсимвол (!@#$) и НИ ОДНОЙ буквы «a»/«A».</div>
+        </div>
+
+        <!-- 4. Капча со сравнением цветов -->
+        <div class="form-group">
+            <label>Проверка на искусствоведа: подберите HEX-код эталона</label>
+            <div class="color-compare">
+                <div class="color-box-wrap">
+                    <div class="color-sample"></div>
+                    <span>Эталон галереи</span>
+                </div>
+                <div class="color-box-wrap">
+                    <div class="user-color-sample" id="user-color-preview"></div>
+                    <span>Твоя попытка</span>
+                </div>
+            </div>
+            <input type="text" id="hex-captcha" name="hex_code" required placeholder="#000000" maxlength="7">
+            <div class="hell-note" id="color-roast">Введи # и 6 шестнадцатеричных символов. Покажем, насколько ты слепой.</div>
+        </div>
+
+        <!-- 5. Пользовательское соглашение -->
+        <div class="form-group">
+            <div class="terms-box" id="terms-scroll">
+                Пункт 1. Регистрируясь здесь, вы признаёте, что квадрат Малевича — это просто чёрный квадрат, но будете делать вид, что видите в нём глубину.<br><br>
+                Пункт 2. Администрация оставляет за собой право случайно менять ваши оценки картинам на противоположные ради смеха.<br><br>
+                Пункт 3. Вы обязуетесь дочитать это соглашение до самого низа, иначе галочка ниже не активируется.<br><br>
+                Пункт 4. Поздравляем, вы докрутили. Можете ставить галочку. Или не ставить, нам всё равно.
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="agree-check" name="agree" value="true" required disabled style="width: auto;">
+                <span>Я прочитал и согласен отдать душу галерее</span>
+            </label>
+        </div>
+
+        <!-- 6. Убегающая кнопка -->
+        <div class="runaway-wrapper">
+            <button type="submit" class="btn" id="submit-btn">Зарегистрироваться</button>
+        </div>
+        <div style="text-align: right;">
+            <span class="reset-link" onclick="location.reload()">Сдаться и начать заново</span>
+        </div>
+    </form>
+
+    <div class="auth-footer">
+        Уже страдали здесь раньше? <a href="/login">Войти</a>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('hell-form');
+    const ageSlider = document.getElementById('age-slider');
+    const ageVal = document.getElementById('age-val');
+    const ageRoast = document.getElementById('age-roast');
+    const usernameInput = document.getElementById('username');
+    const loginRoast = document.getElementById('login-roast');
+    const passInput = document.getElementById('password');
+    const passRoast = document.getElementById('pass-roast');
+    const termsScroll = document.getElementById('terms-scroll');
+    const agreeCheck = document.getElementById('agree-check');
+    const submitBtn = document.getElementById('submit-btn');
+    const hexCaptcha = document.getElementById('hex-captcha');
+    const userColorPreview = document.getElementById('user-color-preview');
+    const colorRoast = document.getElementById('color-roast');
+
+    let dodgeCount = 0;
+
+    function setFieldState(inputEl, noteEl, isOk, message) {
+        noteEl.innerText = message;
+        if (isOk) {
+            inputEl.classList.remove('input-bad');
+            inputEl.classList.add('input-ok');
+            noteEl.classList.add('ok-note');
+        } else {
+            inputEl.classList.remove('input-ok');
+            inputEl.classList.add('input-bad');
+            noteEl.classList.remove('ok-note');
+        }
+    }
+
+    // 1. Комментарии к возрасту
+    ageSlider.addEventListener('keydown', function(e) { e.preventDefault(); });
+    ageSlider.addEventListener('input', function() {
+        const val = parseFloat(ageSlider.value) || 0;
+        ageVal.innerText = val.toFixed(2);
+        if (val < 18) {
+            ageRoast.innerText = "Ошибка: маловат для высокого искусства (нужно 18+). Подкрути ещё.";
+        } else if (val > 90) {
+            ageRoast.innerText = "Ого, вы лично позировали для наскальной живописи?";
+        } else {
+            ageRoast.innerText = "Возраст подходит, но попасть в ровное число всё равно не выйдет.";
+        }
+    });
+
+    // 2. Прожарка логина
+    usernameInput.addEventListener('input', function() {
+        const val = usernameInput.value;
+        if (val.length === 0) {
+            usernameInput.classList.remove('input-bad', 'input-ok');
+            return;
+        }
+        if (/[^a-zA-Z0-9_]/.test(val)) {
+            setFieldState(usernameInput, loginRoast, false, "Ошибка: ТОЛЬКО ЛАТИНИЦА! Убери кириллицу и пробелы.");
+        } else if (/[aeiouy]/i.test(val)) {
+            setFieldState(usernameInput, loginRoast, false, "Ошибка: найдена гласная (A, E, I, O, U, Y)! Убери её!");
+        } else if (val.length < 3 || val.length > 12) {
+            setFieldState(usernameInput, loginRoast, false, "Ошибка длины: нужно от 3 до 12 символов (сейчас: " + val.length + ").");
+        } else {
+            setFieldState(usernameInput, loginRoast, true, "Принято. Выглядит как чих кота по клавиатуре.");
+        }
+    });
+
+    // 3. Проверка пароля
+    passInput.addEventListener('input', function() {
+        const p = passInput.value;
+        if (p.length === 0) {
+            passInput.classList.remove('input-bad', 'input-ok');
+            return;
+        }
+        if (/[^\x21-\x7E]/.test(p)) {
+            setFieldState(passInput, passRoast, false, "Ошибка: запрещённые символы! Только латиница, цифры и знаки.");
+        } else if (/[aA]/.test(p)) {
+setFieldState(passInput, passRoast, false, "Ошибка: в пароле есть буква «a» или «A»! Удали её!");
+} else if (!/[0-9]/.test(p)) {
+setFieldState(passInput, passRoast, false, "Ошибка: не хватает обычной арабской цифры (0-9).");
+} else if (!/[IVXLCDM]/.test(p)) {
+setFieldState(passInput, passRoast, false, "Ошибка: не хватает заглавной римской цифры (I, V, X, L, C, D, M).");
+} else if (!/[!@#$%^&*()_+-={};':"\|,.<>?]/.test(p)) {
+setFieldState(passInput, passRoast, false, "Ошибка: добавь хотя бы один спецсимвол (!@#$...).");
+} else {
+setFieldState(passInput, passRoast, true, "Принято. Этот пароль настолько ужасен, что даже хакеры побрезгуют.");
+}
+});
+// 4. Живой радар цвета
+hexCaptcha.addEventListener('input', function() {
+const val = hexCaptcha.value.trim().toLowerCase();
+if (!/^#[0-9a-f]{6}$/.test(val)) {
+userColorPreview.style.backgroundColor = '#ffffff';
+setFieldState(hexCaptcha, colorRoast, false, "Формат: решётка и ровно 6 символов (0-9, a-f). Например: #12ab34.");
+return;
+}
+userColorPreview.style.backgroundColor = val;
+if (val === '#7b3f00') {
+setFieldState(hexCaptcha, colorRoast, true, "Глаз-алмаз! Идеальное попадание в благородный #7b3f00.");
+return;
+}
+const r = parseInt(val.slice(1, 3), 16);
+const g = parseInt(val.slice(3, 5), 16);
+const b = parseInt(val.slice(5, 7), 16);
+let hints = [];
+if (Math.abs(r - 123) > 10) hints.push(r < 123 ? "мало красного" : "много красного");
+if (Math.abs(g - 63) > 10) hints.push(g < 63 ? "мало зелёного" : "много зелёного");
+if (b > 10) hints.push("убери синий в ноль");
+const hintText = hints.length > 0 ? hints.join(", ") : "совсем рядом, подкрути пару единиц!";
+setFieldState(hexCaptcha, colorRoast, false, "Мимо! Посмотри на квадрат справа: " + hintText + ".");
+});
+// 5. Разблокировка чекбокса только после скролла
+termsScroll.addEventListener('scroll', function() {
+if (termsScroll.scrollTop + termsScroll.clientHeight >= termsScroll.scrollHeight - 5) {
+agreeCheck.disabled = false;
+}
+});
+// 6. Убегающая кнопка
+submitBtn.addEventListener('mouseover', function() {
+if (dodgeCount < 5) {
+const randomX = Math.floor(Math.random() * 240);
+const randomY = Math.floor(Math.random() * 25);
+submitBtn.style.left = randomX + 'px';
+submitBtn.style.top = randomY + 'px';
+dodgeCount++;
+if (dodgeCount === 5) {
+submitBtn.innerText = "Ладно, жми уже...";
+submitBtn.style.left = '0px';
+submitBtn.style.top = '0px';
+}
+}
+});
+// 7. Отправка формы на FastAPI (блокируем ТОЛЬКО если есть ошибки)
+form.addEventListener('submit', function(e) {
+const hex = hexCaptcha.value.trim().toLowerCase();
+const age = parseFloat(ageSlider.value) || 0;
+if (age < 18) {
+e.preventDefault();
+alert('Куда лезешь? Тебе ещё нет 18.00 лет! Подкрути ползунок.');
+return;
+}
+if (hex !== '#7b3f00') {
+e.preventDefault();
+alert('НЕВЕРНЫЙ HEX-КОД! Сравни свой квадрат с эталоном. В наказание мы сбрасываем форму!');
+form.reset();
+ageVal.innerText = '0.00';
+userColorPreview.style.backgroundColor = '#ffffff';
+agreeCheck.disabled = true;
+dodgeCount = 0;
+submitBtn.innerText = "Зарегистрироваться";
+document.querySelectorAll('input').forEach(el => el.classList.remove('input-bad', 'input-ok'));
+}
+// Если всё верно — e.preventDefault() НЕ вызывается, и форма улетает в FastAPI!
+});
+</script>
+{% endblock %}
