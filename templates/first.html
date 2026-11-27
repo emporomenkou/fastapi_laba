@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Добро пожаловать — Галерея & Рейтинг{% endblock %}
+
+{% block content %}
+<div class="welcome-card">
+    <h1>Добро пожаловать на выставку сомнительных шедевров</h1>
+    <p class="subtitle">
+        Здесь каждый может почувствовать себя великим критиком и беспощадно оценить чужое творчество.
+    </p>
+    <p class="auth-notice">
+        Чтобы разглядеть картины поближе и начать раздавать оценки, вам придётся представиться. 
+        Анонимных зрителей охрана не пускает.
+    </p>
+    <div class="welcome-actions">
+        <a href="/login" class="btn btn-primary">Войти</a>
+        <a href="/register" class="btn btn-secondary">Зарегистрироваться</a>
+    </div>
+</div>
+{% endblock %}
