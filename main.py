@@ -56,6 +56,13 @@ async def auth_middleware(request: Request, call_next):
 
     return await call_next(request)
 
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="kriv0obotkrivo0botkriv0obot",
+    max_age=SESSION_LIFETIME,
+    https_only=True,
+)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 app.mount("/images", StaticFiles(directory="images"), name="images")
@@ -140,7 +147,6 @@ def register(request: Request,
     new_user = pd.DataFrame([{'username' : username, 'password' : hash_password(password + username), 'avatar' : avatar_url, 'unique_id' : len(users_new)}])
     new_user.to_csv('users.csv', mode="a", index=False, header=False, encoding="utf-8")
     request.session['username'] = username
-    request.session['password_hash'] = hash_password(password + username)
     request.session['session_starttime'] = str(datetime.now())
     request.session['user_unique_id'] = len(users_new)
     response = RedirectResponse(url=f"/home", status_code=302)
